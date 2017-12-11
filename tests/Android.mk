@@ -6,10 +6,9 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     mockito-target-minus-junit4 \
-    android-support-test \
-    legacy-android-test
+    android-support-test
 
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base android.test.mock
 
 # Only compile source java files in this apk.
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
