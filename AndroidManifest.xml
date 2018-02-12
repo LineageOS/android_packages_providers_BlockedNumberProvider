@@ -21,6 +21,7 @@
     <application
         android:process="android.process.acore"
         android:label="@string/app_label"
+        android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="false"
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true"
