@@ -308,8 +308,11 @@ public class BlockedNumberProvider extends ContentProvider {
         switch (method) {
             case BlockedNumberContract.METHOD_IS_BLOCKED:
                 enforceReadPermissionAndPrimaryUser();
-
-                res.putBoolean(BlockedNumberContract.RES_NUMBER_IS_BLOCKED, isBlocked(arg));
+                boolean isBlocked = isBlocked(arg);
+                res.putBoolean(BlockedNumberContract.RES_NUMBER_IS_BLOCKED, isBlocked);
+                res.putInt(BlockedNumberContract.RES_BLOCK_STATUS,
+                        isBlocked ? BlockedNumberContract.STATUS_BLOCKED_IN_LIST
+                                : BlockedNumberContract.STATUS_NOT_BLOCKED);
                 break;
             case BlockedNumberContract.METHOD_CAN_CURRENT_USER_BLOCK_NUMBERS:
                 // No permission checks: any app should be able to access this API.
@@ -341,8 +344,10 @@ public class BlockedNumberProvider extends ContentProvider {
                 break;
             case SystemContract.METHOD_SHOULD_SYSTEM_BLOCK_NUMBER:
                 enforceSystemReadPermissionAndPrimaryUser();
+                int blockReason = shouldSystemBlockNumber(arg, extras);
                 res.putBoolean(BlockedNumberContract.RES_NUMBER_IS_BLOCKED,
-                        shouldSystemBlockNumber(arg, extras));
+                        blockReason != BlockedNumberContract.STATUS_NOT_BLOCKED);
+                res.putInt(BlockedNumberContract.RES_BLOCK_STATUS, blockReason);
                 break;
             case SystemContract.METHOD_SHOULD_SHOW_EMERGENCY_CALL_NOTIFICATION:
                 enforceSystemReadPermissionAndPrimaryUser();
@@ -474,42 +479,54 @@ public class BlockedNumberProvider extends ContentProvider {
                 blockSuppressionExpiryTimeMillis);
     }
 
-    private boolean shouldSystemBlockNumber(String phoneNumber, Bundle extras) {
+    private int shouldSystemBlockNumber(String phoneNumber, Bundle extras) {
         if (getBlockSuppressionStatus().isSuppressed) {
-            return false;
+            return BlockedNumberContract.STATUS_NOT_BLOCKED;
         }
         if (isEmergencyNumber(phoneNumber)) {
-            return false;
+            return BlockedNumberContract.STATUS_NOT_BLOCKED;
         }
 
         boolean isBlocked = false;
+        int blockReason = BlockedNumberContract.STATUS_NOT_BLOCKED;
         if (extras != null && !extras.isEmpty()) {
             // check enhanced blocking setting
             boolean contactExist = extras.getBoolean(BlockedNumberContract.EXTRA_CONTACT_EXIST);
             int presentation = extras.getInt(BlockedNumberContract.EXTRA_CALL_PRESENTATION);
             switch (presentation) {
                 case TelecomManager.PRESENTATION_ALLOWED:
-                    isBlocked = getEnhancedBlockSetting(
+                    if (getEnhancedBlockSetting(
                             SystemContract.ENHANCED_SETTING_KEY_BLOCK_UNREGISTERED)
-                                    && !contactExist;
+                                    && !contactExist) {
+                        blockReason = BlockedNumberContract.STATUS_BLOCKED_NOT_IN_CONTACTS;
+                    }
                     break;
                 case TelecomManager.PRESENTATION_RESTRICTED:
-                    isBlocked = getEnhancedBlockSetting(
-                            SystemContract.ENHANCED_SETTING_KEY_BLOCK_PRIVATE);
+                    if (getEnhancedBlockSetting(
+                            SystemContract.ENHANCED_SETTING_KEY_BLOCK_PRIVATE)) {
+                        blockReason = BlockedNumberContract.STATUS_BLOCKED_RESTRICTED;
+                    }
                     break;
                 case TelecomManager.PRESENTATION_PAYPHONE:
-                    isBlocked = getEnhancedBlockSetting(
-                            SystemContract.ENHANCED_SETTING_KEY_BLOCK_PAYPHONE);
+                    if (getEnhancedBlockSetting(
+                            SystemContract.ENHANCED_SETTING_KEY_BLOCK_PAYPHONE)) {
+                        blockReason = BlockedNumberContract.STATUS_BLOCKED_PAYPHONE;
+                    }
                     break;
                 case TelecomManager.PRESENTATION_UNKNOWN:
-                    isBlocked = getEnhancedBlockSetting(
-                            SystemContract.ENHANCED_SETTING_KEY_BLOCK_UNKNOWN);
+                    if (getEnhancedBlockSetting(
+                            SystemContract.ENHANCED_SETTING_KEY_BLOCK_UNKNOWN)) {
+                        blockReason = BlockedNumberContract.STATUS_BLOCKED_UNKNOWN_NUMBER;
+                    }
                     break;
                 default:
                     break;
             }
         }
-        return isBlocked || isBlocked(phoneNumber);
+        if (blockReason == BlockedNumberContract.STATUS_NOT_BLOCKED && isBlocked(phoneNumber)) {
+            blockReason = BlockedNumberContract.STATUS_BLOCKED_IN_LIST;
+        }
+        return blockReason;
     }
 
     private boolean shouldShowEmergencyCallNotification() {
