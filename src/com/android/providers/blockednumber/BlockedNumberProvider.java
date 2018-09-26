@@ -531,21 +531,31 @@ public class BlockedNumberProvider extends ContentProvider {
 
     private boolean shouldShowEmergencyCallNotification() {
         return isEnhancedCallBlockingEnabledByPlatform()
-                && isAnyEnhancedBlockingSettingEnabled()
+                && (isShowCallBlockingDisabledNotificationAlways()
+                        || isAnyEnhancedBlockingSettingEnabled())
                 && getBlockSuppressionStatus().isSuppressed
                 && getEnhancedBlockSetting(
                         SystemContract.ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION);
     }
 
-    private boolean isEnhancedCallBlockingEnabledByPlatform() {
+    private PersistableBundle getCarrierConfig() {
         CarrierConfigManager configManager = (CarrierConfigManager) getContext().getSystemService(
                 Context.CARRIER_CONFIG_SERVICE);
         PersistableBundle carrierConfig = configManager.getConfig();
         if (carrierConfig == null) {
             carrierConfig = configManager.getDefaultConfig();
         }
-        return carrierConfig.getBoolean(
+        return carrierConfig;
+    }
+
+    private boolean isEnhancedCallBlockingEnabledByPlatform() {
+        return getCarrierConfig().getBoolean(
                 CarrierConfigManager.KEY_SUPPORT_ENHANCED_CALL_BLOCKING_BOOL);
+    }
+
+    private boolean isShowCallBlockingDisabledNotificationAlways() {
+        return getCarrierConfig().getBoolean(
+                CarrierConfigManager.KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL);
     }
 
     private boolean isAnyEnhancedBlockingSettingEnabled() {
