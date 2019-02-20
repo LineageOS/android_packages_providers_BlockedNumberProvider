@@ -15,6 +15,8 @@
  */
 package com.android.providers.blockednumber;
 
+import static android.telecom.Log.piiHandle;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -411,14 +413,11 @@ public class BlockedNumberProvider extends ContentProvider {
 
     private boolean isBlocked(String phoneNumber) {
         if (TextUtils.isEmpty(phoneNumber)) {
+            Log.i(TAG, "isBlocked: NOT BLOCKED; empty #");
             return false;
         }
 
         final String inE164 = Utils.getE164Number(getContext(), phoneNumber, null); // may be empty.
-
-        if (DEBUG) {
-            Log.d(TAG, String.format("isBlocked: in=%s, e164=%s", phoneNumber, inE164));
-        }
 
         final Cursor c = mDbHelper.getReadableDatabase().rawQuery(
                 "SELECT " +
@@ -432,18 +431,22 @@ public class BlockedNumberProvider extends ContentProvider {
                 );
         try {
             while (c.moveToNext()) {
-                if (DEBUG) {
-                    final String original = c.getString(0);
-                    final String e164 = c.getString(1);
-
-                    Log.d(TAG, String.format("match found: original=%s, e164=%s", original, e164));
-                }
+                final String original = c.getString(0);
+                final String e164 = c.getString(1);
+                Log.i(TAG, String.format("isBlocked: BLOCKED; number=%s, e164=%s, foundOrig=%s, "
+                                + "foundE164=%s",
+                        piiHandle(phoneNumber),
+                        piiHandle(inE164),
+                        piiHandle(original),
+                        piiHandle(e164)));
                 return true;
             }
         } finally {
             c.close();
         }
         // No match found.
+        Log.i(TAG, String.format("isBlocked: NOT BLOCKED; number=%s, e164=%s",
+                piiHandle(phoneNumber), piiHandle(inE164)));
         return false;
     }
 
