@@ -2,7 +2,7 @@ android_test {
     name: "BlockedNumberProviderTest",
     static_libs: [
         "mockito-target-minus-junit4",
-        "android-support-test",
+        "androidx.test.rules",
     ],
     libs: [
         "android.test.runner",
