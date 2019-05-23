@@ -632,7 +632,7 @@ public class BlockedNumberProvider extends ContentProvider {
 
             final TelephonyManager telephonyManager =
                     getContext().getSystemService(TelephonyManager.class);
-            return telephonyManager.checkCarrierPrivilegesForPackage(callingPackage) ==
+            return telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(callingPackage) ==
                     TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
         }
         return false;
