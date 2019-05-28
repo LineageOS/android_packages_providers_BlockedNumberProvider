@@ -479,7 +479,7 @@ public class BlockedNumberProviderTest extends AndroidTestCase {
     public void testCarrierAppCanAccessApis() {
         doReturn(PackageManager.PERMISSION_DENIED)
                 .when(mMockContext).checkCallingPermission(anyString());
-        when(mMockContext.mTelephonyManager.checkCarrierPrivilegesForPackage(anyString()))
+        when(mMockContext.mTelephonyManager.checkCarrierPrivilegesForPackageAnyPhone(anyString()))
                 .thenReturn(TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS);
 
         mResolver.insert(
@@ -489,7 +489,7 @@ public class BlockedNumberProviderTest extends AndroidTestCase {
 
         // Dialer check is executed twice: once for insert, and once for isBlocked.
         verify(mMockContext.mTelephonyManager, times(2))
-                .checkCarrierPrivilegesForPackage(anyString());
+                .checkCarrierPrivilegesForPackageAnyPhone(anyString());
     }
 
     public void testSelfCanAccessApis() {
