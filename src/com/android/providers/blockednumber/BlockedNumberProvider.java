@@ -326,17 +326,17 @@ public class BlockedNumberProvider extends ContentProvider {
 
                 res.putInt(BlockedNumberContract.RES_NUM_ROWS_DELETED, unblock(arg));
                 break;
-            case SystemContract.METHOD_NOTIFY_EMERGENCY_CONTACT:
+            case BlockedNumberContract.METHOD_NOTIFY_EMERGENCY_CONTACT:
                 enforceSystemWritePermissionAndPrimaryUser();
 
                 notifyEmergencyContact();
                 break;
-            case SystemContract.METHOD_END_BLOCK_SUPPRESSION:
+            case BlockedNumberContract.METHOD_END_BLOCK_SUPPRESSION:
                 enforceSystemWritePermissionAndPrimaryUser();
 
                 endBlockSuppression();
                 break;
-            case SystemContract.METHOD_GET_BLOCK_SUPPRESSION_STATUS:
+            case BlockedNumberContract.METHOD_GET_BLOCK_SUPPRESSION_STATUS:
                 enforceSystemReadPermissionAndPrimaryUser();
 
                 SystemContract.BlockSuppressionStatus status = getBlockSuppressionStatus();
@@ -344,19 +344,19 @@ public class BlockedNumberProvider extends ContentProvider {
                 res.putLong(SystemContract.RES_BLOCKING_SUPPRESSED_UNTIL_TIMESTAMP,
                         status.untilTimestampMillis);
                 break;
-            case SystemContract.METHOD_SHOULD_SYSTEM_BLOCK_NUMBER:
+            case BlockedNumberContract.METHOD_SHOULD_SYSTEM_BLOCK_NUMBER:
                 enforceSystemReadPermissionAndPrimaryUser();
                 int blockReason = shouldSystemBlockNumber(arg, extras);
                 res.putBoolean(BlockedNumberContract.RES_NUMBER_IS_BLOCKED,
                         blockReason != BlockedNumberContract.STATUS_NOT_BLOCKED);
                 res.putInt(BlockedNumberContract.RES_BLOCK_STATUS, blockReason);
                 break;
-            case SystemContract.METHOD_SHOULD_SHOW_EMERGENCY_CALL_NOTIFICATION:
+            case BlockedNumberContract.METHOD_SHOULD_SHOW_EMERGENCY_CALL_NOTIFICATION:
                 enforceSystemReadPermissionAndPrimaryUser();
                 res.putBoolean(BlockedNumberContract.RES_SHOW_EMERGENCY_CALL_NOTIFICATION,
                         shouldShowEmergencyCallNotification());
                 break;
-            case SystemContract.METHOD_GET_ENHANCED_BLOCK_SETTING:
+            case BlockedNumberContract.METHOD_GET_ENHANCED_BLOCK_SETTING:
                 enforceSystemReadPermissionAndPrimaryUser();
                 if (extras != null) {
                     String key = extras.getString(BlockedNumberContract.EXTRA_ENHANCED_SETTING_KEY);
@@ -364,7 +364,7 @@ public class BlockedNumberProvider extends ContentProvider {
                     res.putBoolean(BlockedNumberContract.RES_ENHANCED_SETTING_IS_ENABLED, value);
                 }
                 break;
-            case SystemContract.METHOD_SET_ENHANCED_BLOCK_SETTING:
+            case BlockedNumberContract.METHOD_SET_ENHANCED_BLOCK_SETTING:
                 enforceSystemWritePermissionAndPrimaryUser();
                 if (extras != null) {
                     String key = extras.getString(BlockedNumberContract.EXTRA_ENHANCED_SETTING_KEY);
