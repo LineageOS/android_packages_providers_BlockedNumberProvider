@@ -608,6 +608,7 @@ public class BlockedNumberProviderTest extends AndroidTestCase {
 
     public void testEmergencyNumbersAreNotBlockedBySystem() {
         String emergencyNumber = getEmergencyNumberFromSystemPropertiesOrDefault();
+        doReturn(true).when(mMockContext.mTelephonyManager).isEmergencyNumber(emergencyNumber);
         insert(cv(BlockedNumbers.COLUMN_ORIGINAL_NUMBER, emergencyNumber));
 
         assertIsBlocked(true, emergencyNumber);
