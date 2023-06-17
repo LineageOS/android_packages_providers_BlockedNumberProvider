@@ -22,6 +22,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -41,6 +42,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.SystemProperties;
+import android.os.UserManager;
 import android.provider.BlockedNumberContract;
 import android.provider.BlockedNumberContract.BlockedNumbers;
 import android.provider.BlockedNumberContract.SystemContract;
@@ -64,6 +66,7 @@ import java.util.concurrent.TimeUnit;
 public class BlockedNumberProviderTest extends AndroidTestCase {
     private MyMockContext mMockContext;
     private ContentResolver mResolver;
+    private UserManager mMockUserManager;
 
     @Override
     protected void setUp() throws Exception {
@@ -73,7 +76,9 @@ public class BlockedNumberProviderTest extends AndroidTestCase {
         mMockContext = spy(new MyMockContext(getContext()));
         mMockContext.initializeContext();
         mResolver = mMockContext.getContentResolver();
+        mMockUserManager = mock(UserManager.class);
 
+        when(mMockContext.getSystemService(UserManager.class)).thenReturn(mMockUserManager);
         doReturn(USER_SYSTEM).when(mMockContext).getUserId();
         when(mMockContext.mCountryDetector.detectCountry())
                 .thenReturn(new Country("US", Country.COUNTRY_SOURCE_LOCATION));
@@ -725,6 +730,25 @@ public class BlockedNumberProviderTest extends AndroidTestCase {
             fail("SecurityException expected");
         } catch (SecurityException expected) {
         }
+    }
+
+    public void testCanCurrentUserBlockUsers_systemUser() {
+        doReturn(USER_SYSTEM).when(mMockContext).getUserId();
+        assertTrue(BlockedNumberContract.canCurrentUserBlockNumbers(mMockContext));
+    }
+
+    public void testCanCurrentUserBlockUsers_managedProfile() {
+        int managedProfileUserId = 10;
+        doReturn(managedProfileUserId).when(mMockContext).getUserId();
+        doReturn(true).when(mMockUserManager).isManagedProfile(eq(managedProfileUserId));
+        assertTrue(BlockedNumberContract.canCurrentUserBlockNumbers(mMockContext));
+    }
+
+    public void testCanCurrentUserBlockUsers_secondaryUser() {
+        int secondaryUserId = 11;
+        doReturn(secondaryUserId).when(mMockContext).getUserId();
+        doReturn(false).when(mMockUserManager).isManagedProfile(eq(secondaryUserId));
+        assertFalse(BlockedNumberContract.canCurrentUserBlockNumbers(mMockContext));
     }
 
     private void assertIsBlocked(boolean expected, String phoneNumber) {
