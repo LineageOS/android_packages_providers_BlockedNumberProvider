@@ -416,9 +416,12 @@ public class BlockedNumberProvider extends ContentProvider {
         if (!Flags.enforceTelephonyFeatureMapping()) {
             return tm.isEmergencyNumber(phoneNumber) || tm.isEmergencyNumber(e164Number);
         } else {
+            if (tm == null) {
+                return false;
+            }
             try {
                 return tm.isEmergencyNumber(phoneNumber) || tm.isEmergencyNumber(e164Number);
-            } catch (UnsupportedOperationException e) {
+            } catch (UnsupportedOperationException | IllegalStateException e) {
                 return false;
             }
         }

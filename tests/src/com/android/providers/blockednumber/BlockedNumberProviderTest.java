@@ -22,6 +22,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -629,6 +630,20 @@ public class BlockedNumberProviderTest extends AndroidTestCase {
 
         assertEquals(1, BlockedNumberContract.unblock(mMockContext, "abc.def@gmail.com"));
         assertIsBlocked(false, "abc.def@gmail.com");
+    }
+
+    public void testNumberBlockingWorksWithoutTelephony() {
+        doThrow(new IllegalStateException()).when(mMockContext.mTelephonyManager)
+                .isEmergencyNumber(anyString());
+        assertEquals(BlockedNumberContract.STATUS_NOT_BLOCKED,
+                SystemContract.shouldSystemBlockNumber(mMockContext, "6505551212", null));
+    }
+
+    public void testNumberBlockingWorksWithoutTelephonyTwo() {
+        doThrow(new UnsupportedOperationException()).when(mMockContext.mTelephonyManager)
+                .isEmergencyNumber(anyString());
+        assertEquals(BlockedNumberContract.STATUS_NOT_BLOCKED,
+                SystemContract.shouldSystemBlockNumber(mMockContext, "6505551212", null));
     }
 
     public void testEmergencyNumbersAreNotBlockedBySystem() {
