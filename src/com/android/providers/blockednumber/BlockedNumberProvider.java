@@ -51,7 +51,6 @@ import android.util.Log;
 
 import com.android.common.content.ProjectionMap;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.flags.Flags;
 import com.android.providers.blockednumber.BlockedNumberDatabaseHelper.Tables;
 
 import java.util.Arrays;
@@ -413,17 +412,13 @@ public class BlockedNumberProvider extends ContentProvider {
         final String e164Number = Utils.getE164Number(context, phoneNumber, null);
         TelephonyManager tm = context.getSystemService(TelephonyManager.class);
 
-        if (!Flags.enforceTelephonyFeatureMapping()) {
+        if (tm == null) {
+            return false;
+        }
+        try {
             return tm.isEmergencyNumber(phoneNumber) || tm.isEmergencyNumber(e164Number);
-        } else {
-            if (tm == null) {
-                return false;
-            }
-            try {
-                return tm.isEmergencyNumber(phoneNumber) || tm.isEmergencyNumber(e164Number);
-            } catch (UnsupportedOperationException | IllegalStateException e) {
-                return false;
-            }
+        } catch (UnsupportedOperationException | IllegalStateException e) {
+            return false;
         }
     }
 
