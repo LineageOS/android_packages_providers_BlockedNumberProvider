@@ -11,6 +11,7 @@ android_app {
     static_libs: [
         "android-common",
         "guava",
+        "blockednumberprovider_flags_java_lib",
     ],
     jacoco: {
         include_filter: ["com.android.providers.blockednumber.*"],
@@ -19,4 +20,18 @@ android_app {
     certificate: "shared",
     privileged: true,
 
+}
+
+aconfig_declarations {
+    name: "blockednumberprovider_flags",
+    package: "com.android.providers.blockednumber.flags",
+    container: "system",
+    srcs: [
+        "blockednumberprovider_flags.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "blockednumberprovider_flags_java_lib",
+    aconfig_declarations: "blockednumberprovider_flags",
 }

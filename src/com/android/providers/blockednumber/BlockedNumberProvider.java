@@ -416,7 +416,12 @@ public class BlockedNumberProvider extends ContentProvider {
             return false;
         }
         try {
-            return tm.isEmergencyNumber(phoneNumber) || tm.isEmergencyNumber(e164Number);
+            if (com.android.providers.blockednumber.flags.Flags.ignoreInvalidEmergencyNumbers()) {
+                return tm.isEmergencyNumber(phoneNumber)
+                    || (!TextUtils.isEmpty(e164Number) && tm.isEmergencyNumber(e164Number));
+            } else {
+                return tm.isEmergencyNumber(phoneNumber) || tm.isEmergencyNumber(e164Number);
+            }
         } catch (UnsupportedOperationException | IllegalStateException e) {
             return false;
         }
