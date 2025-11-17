@@ -1,0 +1,12 @@
+package: "com.android.providers.blockednumber.flags"
+container: "system"
+
+flag {
+    name: "ignore_invalid_emergency_numbers"
+    namespace: "blockednumber"
+    description: "Ignore invalid e164 numbers when checking for emergency numbers"
+    bug:"409101896"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

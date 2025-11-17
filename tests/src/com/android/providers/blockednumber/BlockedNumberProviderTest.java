@@ -673,6 +673,30 @@ public class BlockedNumberProviderTest extends AndroidTestCase {
                 createBundleForEnhancedBlocking(TelecomManager.PRESENTATION_UNKNOWN, false)));
     }
 
+    public void testValid164EmergencyNumbersAreNotIgnored() {
+        String emergencyNumber = "0800117117";
+        String validE164EmergencyNumber = "+41800117117";
+        when(mMockContext.mCountryDetector.detectCountry())
+                .thenReturn(new Country("CH", Country.COUNTRY_SOURCE_LOCATION));
+        doReturn(true).when(mMockContext.mTelephonyManager)
+                .isEmergencyNumber(validE164EmergencyNumber);
+        assertEquals(BlockedNumberContract.STATUS_NOT_BLOCKED,
+                SystemContract.shouldSystemBlockNumber(mMockContext, emergencyNumber, null));
+        verify(mMockContext.mTelephonyManager, times(1))
+                .isEmergencyNumber(validE164EmergencyNumber);
+
+        emergencyNumber = "900018018";
+        validE164EmergencyNumber = "+34900018018";
+        when(mMockContext.mCountryDetector.detectCountry())
+                .thenReturn(new Country("ES", Country.COUNTRY_SOURCE_LOCATION));
+        doReturn(true).when(mMockContext.mTelephonyManager)
+                .isEmergencyNumber(validE164EmergencyNumber);
+        assertEquals(BlockedNumberContract.STATUS_NOT_BLOCKED,
+                SystemContract.shouldSystemBlockNumber(mMockContext, emergencyNumber, null));
+        verify(mMockContext.mTelephonyManager, times(1))
+                .isEmergencyNumber(validE164EmergencyNumber);
+    }
+
     public void testPrivilegedAppAccessingApisAsSecondaryUser() {
         doReturn(MIN_SECONDARY_USER_ID).when(mMockContext).getUserId();
 
