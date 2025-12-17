@@ -732,6 +732,10 @@ public class BlockedNumberProvider extends ContentProvider {
     }
 
     private boolean passesSystemPermissionCheck(String permission) {
+        if (getContext().checkCallingOrSelfPermission(TelecomManager.PERMISSION_TELECOM_UI_ACCESS)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
         return getContext().checkCallingPermission(permission)
                 == PackageManager.PERMISSION_GRANTED;
     }
