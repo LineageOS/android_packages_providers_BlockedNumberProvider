@@ -19,6 +19,7 @@
         android:sharedUserId="android.uid.shared">
 
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:process="android.process.acore"
